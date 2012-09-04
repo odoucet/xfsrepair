@@ -10,7 +10,7 @@
  * @author Olivier Doucet <odoucet@php.net>
  * File coded in PHP because it is my main language ... Feel free
  * to rewrite it in any language you want ...
- */
+ ***********************/
 
 
 // these arrays are kept here because they are used globally
@@ -19,12 +19,13 @@ $agblocks   = array();
 
 
 // Multiple checks
-if (PHP_VERSION_ID < 50300) {
+if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300) {
 	echo "ERROR: this script requires PHP 5.3\n";
-	echo "You can use lower version by rewriting lines ~70+ and "
+	echo "You can use lower version by rewriting lines ~70+ and ";
 	echo "replace RecursiveDirectoryIterator by glob() or something else\n";
 	exit;
 }
+
 if (getmyuid () !== 0) {
 	echo "ERROR: This script requires root (because we use mknod)\n";
 	echo "You can comment this warning if you replace the exec(mknod)\n";
@@ -187,12 +188,12 @@ function repair_file($file, $destination) {
 }
 
 function show_syntax() {
-	echo <<<EOF
+	echo "
 	XFSREPAIR.PHP  (by Olivier Doucet <odoucet at php dot net>
 	Restore files when XFS metadata report 0-size file but you know it's wrong ...
 	(Based on http://oss.sgi.com/archives/xfs/2012-02/msg00561.html)
 
-	EOF;
+	";
 	echo "Syntax: ".$argv[0]." <dir_or_file> <destination_dir_or_file>\n";
 	
 }
