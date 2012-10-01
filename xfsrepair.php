@@ -16,6 +16,7 @@
 // these arrays are kept here because they are used globally
 $mknodArray = array();
 $agblocks   = array();
+$sectSize   = array();
 
 
 // Multiple checks
@@ -105,7 +106,7 @@ foreach ($mknodArray as $ver => $name) {
 
 
 function repair_file($file, $destination) {
-	global $mknodArray, $agblocks;
+	global $mknodArray, $agblocks, $sectSize;
 	
 	// Stat
 	$stat = stat($file);
@@ -129,7 +130,7 @@ function repair_file($file, $destination) {
 	// Find device : $stat['dev'] is major,minor
 	// Example : fd08 == 253,08
 	$minor = $stat['dev'] % 256;
-	$major = floor($stat['dev']/256);	
+	$major = floor($stat['dev']/256);
 
 	// mknod  
 	if (!isset($mknodArray[$major.','.$minor])) {
@@ -153,7 +154,18 @@ function repair_file($file, $destination) {
 			return;
 		}
 		$agblocks[$major.','.$minor] = (int) $s;
-		
+        
+        // sector size
+        $s = shell_exec("xfs_db -r ".$tmpName." -c sb -c p | grep ^sectsize | sed 's/.* = //'");
+        if ($s == 0) {
+            echo "Error getting sector size from xfs_db\n";
+            
+			// cleanup
+			unlink($mknodArray[$major.','.$minor]);
+			unset($mknodArray[$major.','.$minor]);
+			return;
+        }
+        $sectSize[$major.','.$minor] = (int) $s;
 	}
 	
 	// now xfs_db for this specific file
@@ -178,7 +190,7 @@ function repair_file($file, $destination) {
 		// Copy action
 		printf('%30s ', $file);
 		echo "restore ".number_format($stat['blocks']*$stat['blksize'])." bytes of data ...\r";
-		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$stat['blksize'].' skip=$(('.$agblocks[$major.','.$minor]
+		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$sectSize[$major.','.$minor].' skip=$(('.$agblocks[$major.','.$minor]
 			.' * '.$preg[3].' + '.$preg[4].')) count='.$stat['blocks'].' of='.$destination.' '.$flags.' 2>&1';
 		$r = shell_exec($cmd);
 	}

@@ -25,5 +25,13 @@ if you destroy some data.
 My work is based on indications here : 
 http://oss.sgi.com/archives/xfs/2012-02/msg00561.html
 
+Please note that files restored will be slightly bigger because size is rounded up by block size.
+
 
 Olivier
+
+Changelog
+---------
+
+October 1st 2012
+I now use sector size from xfs_db instead of stat()
