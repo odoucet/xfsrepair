@@ -11,7 +11,11 @@
  * File coded in PHP because it is my main language ... Feel free
  * to rewrite it in any language you want ...
  ***********************/
-
+ 
+/**
+ * Very very verbose output :)
+ */
+define('DEBUG', 0); 
 
 // these arrays are kept here because they are used globally
 $mknodArray = array();
@@ -29,7 +33,7 @@ if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300) {
 
 if (getmyuid () !== 0) {
 	echo "ERROR: This script requires root (because we use mknod)\n";
-	echo "You can comment this warning if you replace the exec(mknod)\n";
+	echo "You can comment this warning if you replace the exec(mknod) around line 143\n";
 	show_syntax();
 	exit;
 }
@@ -108,7 +112,9 @@ foreach ($mknodArray as $ver => $name) {
 function repair_file($file, $destination) {
 	global $mknodArray, $agblocks, $sectSize;
 	
-	// Stat
+    if (DEBUG) echo "[DEBUG] file=".$file."\n";
+    
+    // Stat
 	$stat = stat($file);
 	if ($stat === false) {
 		echo "ERROR: cannot stat() file ".$file."\n";
@@ -120,6 +126,7 @@ function repair_file($file, $destination) {
 		echo "Cannot extract inode number\n";
 		return;
 	}
+    if (DEBUG) echo "[DEBUG] inode=".$stat['ino']."\n";
 	
 	/* DEBUG
 	echo "File inode:   ".$stat['ino']."\n";
@@ -170,7 +177,16 @@ function repair_file($file, $destination) {
 	
 	// now xfs_db for this specific file
 	$cmd = 'xfs_db -r '.$mknodArray[$major.','.$minor].' -c "inode '.$stat['ino'].'" -c "bmap"';
+    if (DEBUG) echo "[DEBUG] xfs_db command line: ".$cmd."\n";
+    
 	$s = explode("\n", trim(shell_exec($cmd)));
+    
+    if (DEBUG) {
+        echo "[DEBUG] xfs_db output: ";
+        var_dump($s);
+        echo "\n";
+    }
+    
 	// Output is like : 
 	// string(60) "data offset 0 startblock 4910152 (0/4910152) count 1 flag 0"
 
@@ -192,7 +208,10 @@ function repair_file($file, $destination) {
 		echo "restore ".number_format($stat['blocks']*$stat['blksize'])." bytes of data ...\r";
 		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$sectSize[$major.','.$minor].' skip=$(('.$agblocks[$major.','.$minor]
 			.' * '.$preg[3].' + '.$preg[4].')) count='.$stat['blocks'].' of='.$destination.' '.$flags.' 2>&1';
-		$r = shell_exec($cmd);
+		
+        if (DEBUG) echo "[DEBUG] dd command line : \n".$cmd."\n";
+        
+        $r = shell_exec($cmd);
 	}
 	
 	// print final file
