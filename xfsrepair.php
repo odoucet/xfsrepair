@@ -40,7 +40,7 @@ if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 50300) {
 	exit;
 }
 
-if (getmyuid () !== 0) {
+if (posix_getuid() !== 0) {
 	echo "ERROR: This script requires root (because we use mknod)\n";
 	echo "You can comment this warning if you replace the exec(mknod) around line 143\n";
 	show_syntax();
