@@ -177,7 +177,7 @@ function repair_file($file, $destination) {
 	foreach ($s as $string) {
 		if (!preg_match('@data offset ([0-9]{1,}) startblock ([0-9]{1,}) '
 						.'\(([0-9]{1,})/([0-9]{1,})\) count ([0-9]{1,}) flag ([0-9]{1,})@', $string, $preg)) {
-			echo "ERROR: xfs_db output unknown : \n".$s."\n for file ".$file."\n";
+			echo "ERROR: xfs_db output unknown : \n---------\n".$string."\n---------\n for file ".$file."\n";
 			echo "Please debug me near line ".__LINE__."\n";
 			return;
 		}
