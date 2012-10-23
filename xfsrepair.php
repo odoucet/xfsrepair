@@ -17,6 +17,15 @@
  */
 define('DEBUG', 0); 
 
+/**
+ * There is actually a bug in blockSize detection.
+ * Default version == use blksize returned by stat() call
+ * Second  version == use sectorSize on device
+ * If files restored for you are too big / invalid, change this value.
+ * Values : 'blksize' (default) or 'sectsize' (second version)
+ */
+define('BS_VERSION', 'blksize');
+
 // these arrays are kept here because they are used globally
 $mknodArray = array();
 $agblocks   = array();
@@ -215,8 +224,15 @@ function repair_file($file, $destination) {
 		
 		// Copy action
 		printf('%30s ', $file);
+        if (BS_VERSION == 'blksize')
+            $bsValue = $stat['blksize'];
+        elseif (BS_VERSION == 'sectorsize') 
+            $bsValue = $sectSize[$major.','.$minor];
+        else
+            exit('const BS_VERSION has invalid value. Should be "blksize" or "sectorsize"');
+            
 		echo "restore ".number_format($stat['blocks']*$stat['blksize'])." bytes of data ...\r";
-		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$sectSize[$major.','.$minor].' skip=$(('.$agblocks[$major.','.$minor]
+		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$bsValue.' skip=$(('.$agblocks[$major.','.$minor]
 			.' * '.$preg[3].' + '.$preg[4].')) count='.$stat['blocks'].' of='.$destination.' '.$flags.' 2>&1';
 		
         if (DEBUG) echo "[DEBUG] dd command line : \n".$cmd."\n";
