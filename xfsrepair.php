@@ -192,7 +192,8 @@ function repair_file($file, $destination) {
     
     if (count($s) == 1 && trim($s[0]) == "") {
         // no hope
-        echo "[ERROR] No hope to restore file \"".$file."\" because bitmap is lost.\n";
+        echo "[ERROR] Bitmap empty for \"".$file."\". Content empty or lost\n";
+        touch($destination);
         return;
     }
     
