@@ -162,6 +162,8 @@ function repair_file($file, $destination) {
 		}
 		$agblocks[$major.','.$minor] = (int) $s;
         
+        if (DEBUG) echo "[DEBUG] agblocks(".$major.','.$minor.") = ".$s."\n";
+        
         // sector size
         $s = shell_exec("xfs_db -r ".$tmpName." -c sb -c p | grep ^sectsize | sed 's/.* = //'");
         if ($s == 0) {
@@ -173,6 +175,7 @@ function repair_file($file, $destination) {
 			return;
         }
         $sectSize[$major.','.$minor] = (int) $s;
+        if (DEBUG) echo "[DEBUG] sectorSize(".$major.','.$minor.") = ".$s."\n";
 	}
 	
 	// now xfs_db for this specific file
@@ -185,6 +188,12 @@ function repair_file($file, $destination) {
         echo "[DEBUG] xfs_db output: ";
         var_dump($s);
         echo "\n";
+    }
+    
+    if (count($s) == 1 && trim($s[0]) == "") {
+        // no hope
+        echo "[ERROR] No hope to restore file \"".$file."\" because bitmap is lost.\n";
+        return;
     }
     
 	// Output is like : 
