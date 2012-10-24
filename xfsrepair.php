@@ -233,7 +233,7 @@ function repair_file($file, $destination) {
             
 		echo "restore ".number_format($stat['blocks']*$stat['blksize'])." bytes of data ...\r";
 		$cmd = 'dd if='.$mknodArray[$major.','.$minor].' bs='.$bsValue.' skip=$(('.$agblocks[$major.','.$minor]
-			.' * '.$preg[3].' + '.$preg[4].')) count='.$stat['blocks'].' of='.$destination.' '.$flags.' 2>&1';
+			.' * '.$preg[3].' + '.$preg[4].')) count='.$stat['blocks'].' of="'.$destination.'" '.$flags.' 2>&1';
 		
         if (DEBUG) echo "[DEBUG] dd command line : \n".$cmd."\n";
         
