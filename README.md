@@ -32,9 +32,13 @@ Olivier
 
 Changelog
 ---------
-October 23rd 2012
+
+###  October 24th 2012
+Fix bug with filenames containing special characters (like #, & ...)
+
+###  October 23rd 2012
 For some people, sector size returned by xfs_db is wrong ...
 So I added a constant BS_VERSION to switch source to use. See source code for details.
 
-October 1st 2012
+###  October 1st 2012
 I now use sector size from xfs_db instead of stat()
